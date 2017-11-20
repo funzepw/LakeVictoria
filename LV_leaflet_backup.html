@@ -1,0 +1,311 @@
+
+<!doctype html>
+
+<!-- Coded by Matt Caddenhead
+	 For NSF Grant #1518532
+		-->
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>LakeVicFish.org Leaflet</title>
+		
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="./stylesheets/css.css"/>
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"/>
+		<link rel="stylesheet" href="./stylesheets/LV/measure_tool.css"/>
+
+
+		
+		<!-- Javascript -->
+		<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+		<script src="./javascript/measure_tool.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+		
+		<!-- GeoJSON overlays -->
+		<script src="./javascript/basin.js"></script>
+		<script src="./javascript/subrivers.js"></script>
+		<script src="./javascript/subbasin.js"></script>	
+		<script src="./javascript/shoreline_line.js"></script>
+		<script src="./javascript/CountryBoundaries.js"></script>
+		<script src="./javascript/research_institutions.js"></script>
+	
+		
+	</head>
+		<body>
+		
+		<!-- Fade auomation for text box/legend -->
+			<script>
+				// zoom to feature function
+				function zoomToFeature(e) {
+				  map.fitBounds(e.target.getBounds());
+				}
+				// tie functions to DOM events like onClick etc.
+				function onEachFeature(feature, layer) {
+				  layer.on({
+					click: zoomToFeature
+				  });
+				}
+			
+				$(document).ready(function() {
+					$('.legend').delay(1000).fadeOut('normal');
+					$('.img').hover(
+						function() {
+							$('.legend').fadeIn('normal');
+						},
+						function() {
+							$('.legend').fadeOut('normal');
+						}
+					);
+				});
+				
+			</script>
+
+			
+			<!-- LV Fish logo -->
+			<div class="img">
+				<img src="./images/LVFishLogoWhiteBkg.png">
+			</div>
+
+			<div class="legend">
+				<img src="./images/LV_content.png">
+			</div>
+
+			<div id="map"></div>
+			<script>
+			
+			
+			//calling geoJson and embeded styles from js
+			
+			var a = L.geoJson(poly2, {
+				style: BasinStyle}),
+				
+				b = L.geoJson(subrivers, {
+				style: Rivers}),
+				
+			//switch statement to categorically style	
+			
+				c = L.geoJson(subbasin1, {
+				style: function(feature){
+					switch (feature.properties.OBJECTID) {
+						case 1: return {color:"#993333", 
+							weight:3};
+						case 2: return {color:"#993333",
+							weight:3};
+						case 3: return {color:"#993333",
+							weight:3};
+						case 4: return {color:"#993333",
+							weight:3};
+						case 5: return {color:"#993333",
+							weight:3};
+						case 6: return {color:"#993333",
+							weight:3};
+						case 7: return {color:"#993333",
+							weight:3};
+						case 8: return {color:"#993333",
+							weight:3};
+						case 9: return {color:"#993333",
+							weight:3};
+						case 10: return {color:"#993333",
+							weight:3};
+						case 11: return {color:"#993333",
+							weight:3};
+						case 12: return {color:"#993333",
+							weight:3};
+						case 13: return {color:"#993333",
+							weight:3};
+						case 14: return {color:"#993333",
+							weight:3};
+						case 15: return {color:"#993333",
+							weight:3};
+						case 16: return {color:"#993333",
+							weight:3};
+						case 17: return {color:"#993333",
+							weight:3};
+						case 18: return {color:"#993333",
+							weight:3};
+						case 19: return {color:"#993333",
+							weight:3};
+						case 20: return {color:"#993333",
+							weight:3};
+						case 21: return {color:"#993333",
+							weight:3};
+						case 22: return {color:"#993333",
+							weight:3};
+						case 23: return {color:"#993333",
+							weight:3};
+						case 24: return {color:"#993333",
+							weight:3};
+						case 25: return {color:"#993333",
+							weight:3};
+						case 26: return {color:"#993333",
+							weight:3};
+						case 27: return {color:"#993333",
+							weight:3};
+						case 28: return {color:"#993333",
+							weight:3};
+						}
+					}
+				}),
+				
+				d = L.geoJson(shoreline, {
+				style: Shoreline_style}),
+				
+				//switch statement to categorically style	
+				
+				e = L.geoJson(countries, {
+				style: function(feature){
+					switch (feature.properties.NAME_ENGLI) {
+						case 'Burundi': return {color: "#13EBD5"};
+						case 'Kenya': return {color: "#D4A190"};
+						case 'Rwanda': return {color: "#4F7514"};
+						case 'Tanzania': return {color: "#C390D4"};
+						case 'Uganda': return {color: "#E32749"};
+						case 'Democratic Republic of the Congo': return {color: "#74A113"};
+						}
+					},
+					// added onEachFeature to center on each country
+					onEachFeature: onEachFeature
+				}),
+				
+				//bind popups
+				
+				f = L.geoJson(institutions, {
+					onEachFeature: function (feature, layer){
+						popupOptions = {maxWidth: 250};
+						layer.bindPopup("<b>Research Instituition:</b> " + feature.properties.Institutio
+						,popupOptions);
+						}
+						})
+			
+		
+			//assigning variables to layers for control	
+			var aShp = L.layerGroup([a]),
+				
+				bShp = L.layerGroup([b]),
+				
+				cShp = L.layerGroup([c]),
+				
+				dShp = L.layerGroup([d]),
+				
+				eShp = L.layerGroup([e]),
+				
+				fShp = L.layerGroup([f]);
+			
+			
+			
+			//background images
+			var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			});
+			var Esri_WorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+			});
+			var Esri_WorldShadedRelief = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
+				maxZoom: 13
+			});
+			var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+				maxZoom: 17,
+				attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+			});
+			
+			
+			var imageUrl = './images/bathy_pw.png'
+    				imageBounds = [[-3.1826174, 30.0344700], [0.6689137, 36.4251191]];
+			var bathyImage = L.imageOverlay(imageUrl, imageBounds);
+			
+			//set map extent, view, and default layer
+			var map = L.map('map', {
+				layers: [OpenStreetMap_Mapnik, dShp, fShp]
+				}).setView([-1.073852, 32.916346], 7);
+			
+			
+			//create basemaps variable to call within the control
+			var baseMaps = {
+				"Open Street Map": OpenStreetMap_Mapnik,
+				"Esri World Imagery": Esri_WorldImagery,
+				"Esri World Shade Relief": Esri_WorldShadedRelief,
+				"Open Topo Map": OpenTopoMap
+			};
+			
+			
+			//create overlays variable to call within the control. Calls layer groups
+			var overLays = {
+				"Basin": aShp,
+				"Rivers":bShp,
+				"Sub-basins":cShp,
+				"Shoreline":dShp,
+				"Country Boundaries":eShp,
+				"Partner Research Institutions":fShp,
+				"Bathymetry":bathyImage
+			};
+			
+			//add control to map
+			L.control.layers(baseMaps, overLays).addTo(map);
+			bathyImage.addTo(map);
+			
+			// control that shows country info on hover
+			var info = L.control();
+
+			info.onAdd = function(map) {
+			  this._div = L.DomUtil.create('div', 'info');
+			  this.update();
+			  return this._div;
+			};
+			//changed from state properties to country
+			info.update = function(props) {
+			  this._div.innerHTML = '<h4>Country </h4>' + (props ?
+				'<b>' + props.NAME_ENGLI + '</b><br />' + '' :
+				'Hover over a country');
+			};
+
+			info.addTo(map);	
+			
+			// highlightFeature function
+			function highlightFeature(e) {
+			  var layer = e.target;
+
+			  layer.setStyle({
+				weight: 5,
+				color: '#D1C9C9',
+				dashArray: '',
+				fillOpacity: 0.7
+			  });
+
+			  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+				layer.bringToFront();
+			  }
+
+			  info.update(layer.feature.properties);
+			}
+
+			var geojson;
+			// reset previously highlighted feature function
+			function resetHighlight(e) {
+			  geojson.resetStyle(e.target);
+			  info.update();
+			}
+			// zoom to feature function
+			function zoomToFeature(e) {
+			  map.fitBounds(e.target.getBounds());
+			}
+			// tie functions to DOM events like onClick etc.
+			function onEachFeature(feature, layer) {
+			  layer.on({
+				mouseover: highlightFeature,
+				mouseout: resetHighlight,
+				click: zoomToFeature
+			  });
+			}
+			
+		
+			
+			</script>
+			
+		</body>
+		
+
+	
