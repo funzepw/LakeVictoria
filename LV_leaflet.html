@@ -1,0 +1,230 @@
+<!--	Code written by Tom Simpson-->
+<!--	Code written by Stu Hamilton-->
+<!--	Code written by Matt Caddenhead-->
+<!--	Code written by Noah Krach-->
+<!--	Code written by Carl Flint-->
+
+<!--	Funded by NSF 1518532-->
+
+<!--	Data Sources-->
+<!--	All Data at Harvard Dataverse https://dataverse.harvard.edu/dataverse/LakeVicFish-->
+<!--	Bathy at  http://faculty.salisbury.edu/~sehamilton/LV_bathy/-->
+
+<!doctype html>
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>LakeVicFish.org Leaflet</title>
+		
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="./stylesheets/css.css"/>
+		<link rel="stylesheet" href="http://unpkg.com/leaflet@1.2.0/dist/leaflet.css"/>
+		<link rel="stylesheet" href="./stylesheets/measure_tool.css"/>
+		
+		<!-- Javascript -->
+		<script src="http://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+		<script src="./javascript/measure_tool.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+		<script src="./javascript/bing_js/leaflet-bing-layer.js"></script>
+
+		
+		<!-- GeoJSON overlays -->
+		<script src="./javascript/wgs_basin.js"></script>
+		<script src="./javascript/subrivers.js"></script>
+		<script src="./javascript/subbasin.js"></script>	
+		<script src="./javascript/shoreline_line.js"></script>
+		<script src="./javascript/CountryBoundaries.js"></script>
+		<script src="./javascript/research_institutions.js"></script>
+	
+		
+	</head>
+		<body>
+		
+		<!-- Fade auomation for text box/legend -->
+			<script>						
+				$(document).ready(function() {
+					$('.legend').delay(1000).fadeOut('normal');
+					$('.img').hover(
+						function() {
+							$('.legend').fadeIn('normal');
+						},
+						function() {
+							$('.legend').fadeOut('normal');
+						}
+					);
+				});
+				
+			</script>
+
+			
+			<!-- LV Fish logo -->
+			<div class="img">
+				<img src="./images/LVFishLogoWhiteBkg.png">
+			</div>
+
+			<div class="legend">
+				<img src="./images/LV_content.png">
+			</div>
+
+			<div id="map"></div>
+			<script>
+			
+			
+			//calling geoJson and embeded styles from js
+			
+			var a = L.geoJson(poly2, {
+				style: BasinStyle}),
+				
+				b = L.geoJson(subrivers, {
+				style: Rivers}),
+				
+			//switch statement to categorically style	
+			
+				c = L.geoJson(subbasin1, {
+				style: subbasinstyle
+				}),
+				
+				d = L.geoJson(shoreline, {
+				style: Shoreline_style}),
+				
+				//switch statement to categorically style	
+				
+				e = L.geoJson(countries, {
+				style: countrystyle
+					// added onEachFeature to center on each country
+					
+				}),
+				
+				//bind popups
+				
+				f = L.geoJson(institutions, {
+					onEachFeature: function (feature, layer){
+						popupOptions = {maxWidth: 250};
+						layer.bindPopup("<b>Research Instituition:</b> " + feature.properties.Institutio
+						,popupOptions);
+						}
+						})
+			
+			//bathImage and legend added
+			var imageUrl = './images/bathy_pw.png'
+    				imageBounds = [[-3.1826174, 30.0344700], [0.6689137, 36.4251191]];
+					
+			var	imageUrl2 = './images/bathy_PW2legend.png',
+				imageBounds2 = [[-3, 34], [-1.8, 34.9]];		
+					
+			var bathyImage = L.imageOverlay(imageUrl, imageBounds);
+			
+			var bathyImage2 = L.imageOverlay(imageUrl2, imageBounds2);
+			
+			var both = L.layerGroup([bathyImage,bathyImage2]);
+			
+			//Basin topography added
+			
+			var imageUrl3 = '.images/bathy_PWhillshade.png'
+				imageBounds3 = [[-5.7328492, 27.7552325], [2.8213131, 41.9487174]];
+					
+			var bathyHill = L.imageOverlay(imageUrl3, imageBounds3);
+			
+			var bathyHill2 = L.layerGroup([bathyHill]);
+			
+			//assigning variables to layers for control	
+			var aShp = L.layerGroup([a]),
+				
+				bShp = L.layerGroup([b]),
+				
+				cShp = L.layerGroup([c]),
+				
+				dShp = L.layerGroup([d]),
+				
+				eShp = L.layerGroup([e]),
+				
+				fShp = L.layerGroup([f]);
+			
+			
+			
+			//background images
+			var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			});
+			var Esri_WorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+			});
+			var Esri_WorldShadedRelief = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
+				maxZoom: 13
+			});
+			var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+				maxZoom: 17,
+				attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+			});
+			
+			var BING_KEY = "PhabRp81gOxGFJuOy9i9~vnMtnNUXME3ydSGEe1UTYA~Aui5BLAS-6QhbQkS0-pj44rprx6n0BwxbVbyryQRQs_OqSsDr7BrleJL7R64vMDi"
+			var bingLayer = L.tileLayer.bing(BING_KEY, {
+			maxZoom:20
+			});
+				
+			//set map extent, view, and default layer	
+			var map = L.map('map', {
+				layers: [OpenStreetMap_Mapnik, dShp, fShp]
+				}).setView([-1.073852, 32.916346], 7);
+			
+			
+			//create basemaps variable to call within the control
+			var baseMaps = {
+				"Open Street Map": OpenStreetMap_Mapnik,
+				"Esri World Imagery": Esri_WorldImagery,
+				"Esri World Shade Relief": Esri_WorldShadedRelief,
+				"Open Topo Map": OpenTopoMap,
+				"Bing Imagery": bingLayer
+			};
+			
+			
+			//create overlays variable to call within the control. Calls layer groups
+			var overLays = {
+				"Basin": aShp,
+				"Rivers":bShp,
+				"Sub-basins":cShp,
+				"Shoreline":dShp,
+				"Country Boundaries":eShp,
+				"Partner Research Institutions":fShp,
+				"Hillshade":bathyHill2,
+				"Bathymetry":both
+			};
+			
+			//add control to map
+			L.control.layers(baseMaps, overLays).addTo(map);
+			bathyImage; bathyImage2; bathyHill.addTo(map);	
+		
+			// highlightFeature function
+			function highlightFeature(e) {
+			  var layer = e.target;
+
+			  layer.setStyle({
+				weight: 5,
+				color: '#D1C9C9',
+				dashArray: '',
+				fillOpacity: 0.7
+			  });
+
+			 			//Check this and associated scripts for errors. Displays tool, but not tool icon.  Error is likely in the script.
+			var measureControl = new L.Control.Measure(
+				{
+					position: 'topright',
+					primaryLengthUnit: 'meters',
+					activeColor: '#ABE67E'
+				}
+			);
+			measureControl.addTo(map);
+
+			}
+			
+
+			
+			</script>
+			
+		</body>
+		
+
+	
